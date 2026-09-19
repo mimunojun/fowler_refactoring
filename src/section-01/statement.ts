@@ -1,29 +1,16 @@
-import { readFileSync } from "node:fs";
-
-const invoices: Invoice[] = JSON.parse(
-  readFileSync(new URL("./invoices.json", import.meta.url), "utf-8"),
-);
-const plays: Play = JSON.parse(
-  readFileSync(new URL("./plays.json", import.meta.url), "utf-8"),
-);
-
-for (const invoice of invoices) {
-  console.log(statement(invoice, plays));
-}
-
-type Invoice = {
+export type Invoice = {
   customer: string;
-  performances: [{ playID: string, audience: number }];
+  performances: { playID: string, audience: number }[];
 };
 
-type Play = {
+export type Play = {
   [playID: string]: {
     name: string;
     type: string;
   }
 };
 
-function statement(invoice: Invoice, plays: Play): string {
+export function statement(invoice: Invoice, plays: Play): string {
   let totalAmount = 0;
   let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
