@@ -1,13 +1,20 @@
+type Performance = {
+  playID: string;
+  audience: number;
+};
+
 export type Invoice = {
   customer: string;
-  performances: { playID: string, audience: number }[];
+  performances: Performance[];
+};
+
+type PlayInfo = {
+  name: string;
+  type: string;
 };
 
 export type Play = {
-  [playID: string]: {
-    name: string;
-    type: string;
-  }
+  [playID: string]: PlayInfo;
 };
 
 export function statement(invoice: Invoice, plays: Play): string {
@@ -28,23 +35,7 @@ export function statement(invoice: Invoice, plays: Play): string {
       throw new Error(`unknown playID: ${perf.playID}`);
     }
 
-    switch (play.type) {
-      case "tragedy":
-        thisAmount = 40000;
-        if (perf.audience > 30) {
-          thisAmount += 1000 * (perf.audience - 30);
-        }
-        break;
-      case "comedy":
-        thisAmount = 30000;
-        if (perf.audience > 20) {
-          thisAmount += 10000 + 500 * (perf.audience - 20);
-        }
-        thisAmount += 300 * perf.audience;
-        break;
-      default:
-        throw new Error(`unknown type: ${play.type}`);
-    }
+    thisAmount = amountFor(play, perf)
 
     // ボリューム特典のポイントを加算
     volumeCredits += Math.max(perf.audience - 30, 0);
@@ -56,5 +47,27 @@ export function statement(invoice: Invoice, plays: Play): string {
   }
   result += `Amount owed is ${format(totalAmount / 100)}\n`;
   result += `You earned ${volumeCredits} credits\n`;
+  return result;
+}
+
+function amountFor(play: PlayInfo, perf: Performance): number {
+  let result = 0;
+  switch (play.type) {
+    case "tragedy":
+      result = 40000;
+      if (perf.audience > 30) {
+        result += 1000 * (perf.audience - 30);
+      }
+      break;
+    case "comedy":
+      result = 30000;
+      if (perf.audience > 20) {
+        result += 10000 + 500 * (perf.audience - 20);
+      }
+      result += 300 * perf.audience;
+      break;
+    default:
+      throw new Error(`unknown type: ${play.type}`);
+  }
   return result;
 }
