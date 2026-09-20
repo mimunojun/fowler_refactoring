@@ -44,7 +44,7 @@ export function createStatementData(invoice: Invoice, plays: Plays): StatementDa
   return statementData;
 
   function enrichPerformance(perf: Performance): EnrichedPerformance {
-    const calculator = new PerformanceCalculator(perf, playInfoFor(perf));
+    const calculator = createPerformanceCalculator(perf, playInfoFor(perf));
     const playInfo = calculator.playInfo;
     const amount = calculator.amount;
     const volumeCredits = calculator.volumeCredits;
@@ -77,32 +77,45 @@ class PerformanceCalculator {
     this.playInfo = playInfo;
   }
 
-  get amount() {
-    let result = 0;
-    switch (this.playInfo.type) {
-      case "tragedy":
-        result = 40000;
-        if (this.performance.audience > 30) {
-          result += 1000 * (this.performance.audience - 30);
-        }
-        break;
-      case "comedy":
-        result = 30000;
-        if (this.performance.audience > 20) {
-          result += 10000 + 500 * (this.performance.audience - 20);
-        }
-        result += 300 * this.performance.audience;
-        break;
-      default:
-        throw new Error(`unknown type: ${this.playInfo.type}`);
-    }
-    return result;
+  get amount(): number {
+    throw new Error(`サブクラスの責務`);
   }
 
   get volumeCredits() {
     let result = 0;
-    result += Math.max(this.performance.audience - 30, 0);
-    if ("comedy" === this.playInfo.type) result += Math.floor(this.performance.audience / 5);
+    result += Math.max(this.performance.audience - 30, 0); if ("comedy" === this.playInfo.type) result += Math.floor(this.performance.audience / 5);
     return result;
+  }
+}
+
+class TragedyCalculator extends PerformanceCalculator {
+  get amount() {
+    let result = 0;
+    result = 40000;
+    if (this.performance.audience > 30) {
+      result += 1000 * (this.performance.audience - 30);
+    }
+    return result;
+  }
+}
+
+class ComedyCalculator extends PerformanceCalculator {
+  get amount() {
+    let result = 0;
+    result = 30000;
+    if (this.performance.audience > 20) {
+      result += 10000 + 500 * (this.performance.audience - 20);
+    }
+    result += 300 * this.performance.audience;
+    return result;
+  }
+}
+
+function createPerformanceCalculator(perf: Performance, playInfo: PlayInfo): PerformanceCalculator {
+  switch (playInfo.type) {
+    case "tragedy": return new TragedyCalculator(perf, playInfo);
+    case "comedy": return new ComedyCalculator(perf, playInfo);
+    default:
+      throw new Error(`未知の演劇の種類: ${playInfo.type}`);
   }
 }
