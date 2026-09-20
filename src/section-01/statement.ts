@@ -107,8 +107,8 @@ export function statement(invoice: Invoice, plays: Play): string {
 export function renderPlainText(data: StatementData): string {
   let result = `Statement for ${data.customer}\n`;
 
-  for (let perf of data.performances) {
-    result += ` ${perf.playInfo.name}: ${usd(perf.amount / 100)} (${perf.audience} seats)\n`;
+  for (let enrichedPerf of data.performances) {
+    result += ` ${enrichedPerf.playInfo.name}: ${usd(enrichedPerf.amount / 100)} (${enrichedPerf.audience} seats)\n`;
   }
 
   result += `Amount owed is ${usd(data.totalAmount / 100)}\n`;
