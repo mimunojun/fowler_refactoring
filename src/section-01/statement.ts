@@ -13,7 +13,7 @@ type PlayInfo = {
   type: string;
 };
 
-export type Play = {
+export type Plays = {
   [playID: string]: PlayInfo;
 };
 
@@ -38,7 +38,12 @@ function usd(current: number) {
   }).format(current);
 }
 
-export function statement(invoice: Invoice, plays: Play): string {
+export function statement(invoice: Invoice, plays: Plays): string {
+  const data = createStatementData(invoice, plays)
+  return renderPlainText(data);
+}
+
+export function createStatementData(invoice: Invoice, plays: Plays): StatementData {
   const enrichedPerformances = invoice.performances.map(enrichPerformance);
   const totalVolumeCredits = totalVolumeCreditsFor(enrichedPerformances);
   const totalAmount = totalAmountFor(enrichedPerformances);
@@ -49,7 +54,7 @@ export function statement(invoice: Invoice, plays: Play): string {
     totalAmount,
     totalVolumeCredits,
   };
-  return renderPlainText(statementData);
+  return statementData;
 
   function enrichPerformance(perf: Performance): EnrichedPerformance {
     const playInfo = playInfoFor(perf);
