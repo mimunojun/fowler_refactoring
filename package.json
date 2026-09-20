@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "type-check": "npx tsc --noEmit",
+    "precommit-test": "npx tsc --noEmit && node --test"
   },
   "keywords": [],
   "author": "",

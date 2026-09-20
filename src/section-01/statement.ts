@@ -38,8 +38,8 @@ export function statement(invoice: Invoice, plays: Play): string {
   };
   return renderPlainText(statementData, plays);
 
-  function enrichPerformance(perf: Performance): Performance {
-    const result = Object.assign({}, perf);
+  function enrichPerformance(perf: Performance): EnrichedPerformance {
+    const result = enrichPerformance(perf).assign({}, perf);
     result.play = playFor(perf);
     return result;
   }
