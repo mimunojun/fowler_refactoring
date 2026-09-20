@@ -20,11 +20,13 @@ export type Play = {
 type EnrichedPerformance = Performance & {
   playInfo: PlayInfo;
   amount: number;
+  volumeCredits: number;
 };
 
-type statementData = {
+type StatementData = {
   customer: string;
   performances: EnrichedPerformance[];
+  totalVolumeCredits: number;
 };
 
 function usd(current: number) {
@@ -36,16 +38,20 @@ function usd(current: number) {
 }
 
 export function statement(invoice: Invoice, plays: Play): string {
-  let statementData: statementData = {
+  const performances = invoice.performances.map(enrichPerformance);
+  const totalVolumeCredits = totalVolumeCreditsFor(performances);
+  const statementData: StatementData = {
     customer: invoice.customer,
-    performances: invoice.performances.map(enrichPerformance),
+    performances,
+    totalVolumeCredits,
   };
-  return renderPlainText(statementData, plays);
+  return renderPlainText(statementData);
 
   function enrichPerformance(perf: Performance): EnrichedPerformance {
     const playInfo = playInfoFor(perf);
     const amount = amountFor(perf, playInfo);
-    return { ...perf, playInfo, amount };
+    const volumeCredits = volumeCreditsFor(perf, playInfo);
+    return { ...perf, playInfo, amount, volumeCredits: volumeCredits };
   }
 
   function playInfoFor(perf: Performance): PlayInfo {
@@ -77,33 +83,33 @@ export function statement(invoice: Invoice, plays: Play): string {
     }
     return result;
   }
-}
 
-export function renderPlainText(data: statementData, plays: Play): string {
-  let result = `Statement for ${data.customer}\n`;
-
-  for (let perf of data.performances) {
-    result += ` ${perf.playInfo?.name}: ${usd(perf.amount / 100)} (${perf.audience} seats)\n`;
-  }
-
-  result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
-  result += `You earned ${totalVolumeCredits()} credits\n`;
-  return result;
-
-  function volumeCreditsFor(perf: EnrichedPerformance): number {
+  function volumeCreditsFor(perf: Performance, playInfo: PlayInfo): number {
     let result = 0;
     result += Math.max(perf.audience - 30, 0);
-    if ("comedy" === perf.playInfo.type) result += Math.floor(perf.audience / 5);
+    if ("comedy" === playInfo.type) result += Math.floor(perf.audience / 5);
     return result;
   }
 
-  function totalVolumeCredits(): number {
+  function totalVolumeCreditsFor(enrichedPerformances: EnrichedPerformance[]): number {
     let result = 0;
-    for (let perf of data.performances) {
-      result += volumeCreditsFor(perf);
+    for (let enrichedPerf of enrichedPerformances) {
+      result += enrichedPerf.volumeCredits;
     }
     return result;
   }
+}
+
+export function renderPlainText(data: StatementData): string {
+  let result = `Statement for ${data.customer}\n`;
+
+  for (let perf of data.performances) {
+    result += ` ${perf.playInfo.name}: ${usd(perf.amount / 100)} (${perf.audience} seats)\n`;
+  }
+
+  result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
+  result += `You earned ${data.totalVolumeCredits} credits\n`;
+  return result;
 
   function totalAmount(): number {
     let result = 0;
