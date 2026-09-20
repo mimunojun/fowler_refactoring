@@ -1,4 +1,4 @@
-import { ComedyCalculator, TragedyCalculator, type PerformanceCalculator } from "./PerformanceCalculator.ts";
+import { ComedyCalculator, TragedyCalculator, type PerformanceCalculator } from "./performance-calculator.ts";
 
 export type Performance = {
   playID: string;
