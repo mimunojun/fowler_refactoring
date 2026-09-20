@@ -47,7 +47,7 @@ export function createStatementData(invoice: Invoice, plays: Plays): StatementDa
     const calculator = new PerformanceCalculator(perf, playInfoFor(perf));
     const playInfo = calculator.playInfo;
     const amount = calculator.amount;
-    const volumeCredits = volumeCreditsFor(perf, playInfo);
+    const volumeCredits = calculator.volumeCredits;
     return { ...perf, playInfo, amount, volumeCredits: volumeCredits };
   }
 
@@ -56,13 +56,6 @@ export function createStatementData(invoice: Invoice, plays: Plays): StatementDa
     if (result == null) {
       throw new Error(`unknown playID: ${perf.playID}`);
     }
-    return result;
-  }
-
-  function volumeCreditsFor(perf: Performance, playInfo: PlayInfo): number {
-    let result = 0;
-    result += Math.max(perf.audience - 30, 0);
-    if ("comedy" === playInfo.type) result += Math.floor(perf.audience / 5);
     return result;
   }
 
@@ -106,4 +99,10 @@ class PerformanceCalculator {
     return result;
   }
 
+  get volumeCredits() {
+    let result = 0;
+    result += Math.max(this.performance.audience - 30, 0);
+    if ("comedy" === this.playInfo.type) result += Math.floor(this.performance.audience / 5);
+    return result;
+  }
 }
