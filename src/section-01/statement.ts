@@ -17,20 +17,23 @@ export type Play = {
   [playID: string]: PlayInfo;
 };
 
-export function statement(invoice: Invoice, plays: Play): string {
-  let totalAmount = 0;
-  let result = `Statement for ${invoice.customer}\n`;
-  const format = new Intl.NumberFormat("en-US", {
+function usd(current: number) {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
-  }).format;
+  }).format(current);
+}
+
+export function statement(invoice: Invoice, plays: Play): string {
+  let totalAmount = 0;
+  let result = `Statement for ${invoice.customer}\n`;
 
   for (let perf of invoice.performances) {
-    result += ` ${playFor(perf).name}: ${format(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
+    result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
     totalAmount += amountFor(perf);
   }
-  result += `Amount owed is ${format(totalAmount / 100)}\n`;
+  result += `Amount owed is ${usd(totalAmount / 100)}\n`;
   result += `You earned ${totalVolumeCredits()} credits\n`;
   return result;
 
