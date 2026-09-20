@@ -17,6 +17,11 @@ export type Play = {
   [playID: string]: PlayInfo;
 };
 
+type statementData = {
+  customer: string;
+  performances: Performance[];
+};
+
 function usd(current: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -26,13 +31,17 @@ function usd(current: number) {
 }
 
 export function statement(invoice: Invoice, plays: Play): string {
-  return renderPlainText(invoice, plays);
+  let statementData: statementData = {
+    customer: invoice.customer,
+    performances: invoice.performances,
+  };
+  return renderPlainText(statementData, invoice, plays);
 }
 
-export function renderPlainText(invoice: Invoice, plays: Play): string {
-  let result = `Statement for ${invoice.customer}\n`;
+export function renderPlainText(data: statementData, invoice: Invoice, plays: Play): string {
+  let result = `Statement for ${data.customer}\n`;
 
-  for (let perf of invoice.performances) {
+  for (let perf of data.performances) {
     result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
   }
 
