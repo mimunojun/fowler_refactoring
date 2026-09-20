@@ -96,19 +96,11 @@ export function statement(invoice: Invoice, plays: Play): string {
   }
 
   function totalVolumeCreditsFor(enrichedPerformances: EnrichedPerformance[]): number {
-    let result = 0;
-    for (let enrichedPerf of enrichedPerformances) {
-      result += enrichedPerf.volumeCredits;
-    }
-    return result;
+    return enrichedPerformances.reduce((acc, val) => acc + val.volumeCredits, 0);
   }
 
   function totalAmountFor(enrichedPerformances: EnrichedPerformance[]): number {
-    let result = 0;
-    for (let perf of enrichedPerformances) {
-      result += perf.amount;
-    }
-    return result;
+    return enrichedPerformances.reduce((acc, val) => acc + val.amount, 0);
   }
 }
 
