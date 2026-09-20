@@ -19,7 +19,6 @@ export type Play = {
 
 export function statement(invoice: Invoice, plays: Play): string {
   let totalAmount = 0;
-  let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
   const format = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -28,16 +27,11 @@ export function statement(invoice: Invoice, plays: Play): string {
   }).format;
 
   for (let perf of invoice.performances) {
-    // ボリューム特典のポイントを加算
-    volumeCredits += Math.max(perf.audience - 30, 0);
-    // 喜劇医のときは10人につき、さらにポイントを加算
-    if ("comedy" === playFor(perf).type) volumeCredits += Math.floor(perf.audience / 5);
-    //　注文の内訳を出力
     result += ` ${playFor(perf).name}: ${format(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
     totalAmount += amountFor(perf);
   }
   result += `Amount owed is ${format(totalAmount / 100)}\n`;
-  result += `You earned ${volumeCredits} credits\n`;
+  result += `You earned ${totalVolumeCredits()} credits\n`;
   return result;
 
   function playFor(perf: Performance): PlayInfo {
@@ -66,6 +60,21 @@ export function statement(invoice: Invoice, plays: Play): string {
         break;
       default:
         throw new Error(`unknown type: ${playFor(perf).type}`);
+    }
+    return result;
+  }
+
+  function volumeCreditsFor(perf: Performance): number {
+    let result = 0;
+    result += Math.max(perf.audience - 30, 0);
+    if ("comedy" === playFor(perf).type) result += Math.floor(perf.audience / 5);
+    return result;
+  }
+
+  function totalVolumeCredits(): number {
+    let result = 0;
+    for (let perf of invoice.performances) {
+      result += volumeCreditsFor(perf);
     }
     return result;
   }
