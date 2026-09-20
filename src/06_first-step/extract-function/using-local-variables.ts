@@ -35,14 +35,26 @@ export function printOwing(invoice: Invoice) {
 
   invoice.dueDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
 
-  // 明細の印字 (print details)
-  console.log(`name: ${invoice.customer}`);
-  console.log(`amount: ${outstanding}`);
-  console.log(`due: ${invoice.dueDate.toLocaleDateString()}`);
+  printDetails(invoice, outstanding);
 
   function printBanner() {
     console.log("***********************");
     console.log("**** Customer Owes ****");
     console.log("***********************");
   }
+}
+
+/**
+ * 処理で参照しているローカル変数を、ただ参照しているだけなので
+ * 引数でそれらを渡せば良い。
+ */
+function printDetails(invoice: Invoice, outstanding: number) {
+  if (invoice.dueDate === undefined) {
+    throw new Error('dueDateが未定義');
+  }
+
+  // 明細の印字 (print details)
+  console.log(`name: ${invoice.customer}`);
+  console.log(`amount: ${outstanding}`);
+  console.log(`due: ${invoice.dueDate.toLocaleDateString()}`);
 }
