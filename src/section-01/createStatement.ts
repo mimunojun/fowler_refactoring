@@ -44,8 +44,9 @@ export function createStatementData(invoice: Invoice, plays: Plays): StatementDa
   return statementData;
 
   function enrichPerformance(perf: Performance): EnrichedPerformance {
-    const playInfo = playInfoFor(perf);
-    const amount = amountFor(perf, playInfo);
+    const calculator = new PerformanceCalculator(perf, playInfoFor(perf));
+    const playInfo = calculator.playInfo;
+    const amount = calculator.amount;
     const volumeCredits = volumeCreditsFor(perf, playInfo);
     return { ...perf, playInfo, amount, volumeCredits: volumeCredits };
   }
@@ -54,28 +55,6 @@ export function createStatementData(invoice: Invoice, plays: Plays): StatementDa
     const result = plays[perf.playID];
     if (result == null) {
       throw new Error(`unknown playID: ${perf.playID}`);
-    }
-    return result;
-  }
-
-  function amountFor(perf: Performance, play: PlayInfo): number {
-    let result = 0;
-    switch (play.type) {
-      case "tragedy":
-        result = 40000;
-        if (perf.audience > 30) {
-          result += 1000 * (perf.audience - 30);
-        }
-        break;
-      case "comedy":
-        result = 30000;
-        if (perf.audience > 20) {
-          result += 10000 + 500 * (perf.audience - 20);
-        }
-        result += 300 * perf.audience;
-        break;
-      default:
-        throw new Error(`unknown type: ${play.type}`);
     }
     return result;
   }
@@ -94,4 +73,37 @@ export function createStatementData(invoice: Invoice, plays: Plays): StatementDa
   function totalAmountFor(enrichedPerformances: EnrichedPerformance[]): number {
     return enrichedPerformances.reduce((acc, val) => acc + val.amount, 0);
   }
+}
+
+class PerformanceCalculator {
+  performance: Performance;
+  playInfo: PlayInfo;
+
+  constructor(perf: Performance, playInfo: PlayInfo) {
+    this.performance = perf;
+    this.playInfo = playInfo;
+  }
+
+  get amount() {
+    let result = 0;
+    switch (this.playInfo.type) {
+      case "tragedy":
+        result = 40000;
+        if (this.performance.audience > 30) {
+          result += 1000 * (this.performance.audience - 30);
+        }
+        break;
+      case "comedy":
+        result = 30000;
+        if (this.performance.audience > 20) {
+          result += 10000 + 500 * (this.performance.audience - 20);
+        }
+        result += 300 * this.performance.audience;
+        break;
+      default:
+        throw new Error(`unknown type: ${this.playInfo.type}`);
+    }
+    return result;
+  }
+
 }
