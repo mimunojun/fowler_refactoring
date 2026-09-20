@@ -26,6 +26,10 @@ function usd(current: number) {
 }
 
 export function statement(invoice: Invoice, plays: Play): string {
+  return renderPlainText(invoice, plays);
+}
+
+export function renderPlainText(invoice: Invoice, plays: Play): string {
   let result = `Statement for ${invoice.customer}\n`;
 
   for (let perf of invoice.performances) {
@@ -80,7 +84,7 @@ export function statement(invoice: Invoice, plays: Play): string {
     }
     return result;
   }
-  
+
   function totalAmount(): number {
     let result = 0;
     for (let perf of invoice.performances) {
