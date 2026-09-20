@@ -1,7 +1,6 @@
 type Performance = {
   playID: string;
   audience: number;
-  play?: PlayInfo;
 };
 
 export type Invoice = {
@@ -18,9 +17,14 @@ export type Play = {
   [playID: string]: PlayInfo;
 };
 
+type EnrichedPerformance = Performance & {
+    play: PlayInfo;
+    amount: number;
+}
+
 type statementData = {
   customer: string;
-  performances: Performance[];
+  performances: EnrichedPerformance[];
 };
 
 function usd(current: number) {
@@ -39,7 +43,7 @@ export function statement(invoice: Invoice, plays: Play): string {
   return renderPlainText(statementData, plays);
 
   function enrichPerformance(perf: Performance): EnrichedPerformance {
-    const result = enrichPerformance(perf).assign({}, perf);
+    const result: EnrichedPerformance = Object(perf);
     result.play = playFor(perf);
     return result;
   }
@@ -65,9 +69,9 @@ export function renderPlainText(data: statementData, plays: Play): string {
   return result;
 
 
-  function amountFor(perf: Performance): number {
+  function amountFor(perf: EnrichedPerformance): number {
     let result = 0;
-    switch (perf.play?.type) {
+    switch (perf.play.type) {
       case "tragedy":
         result = 40000;
         if (perf.audience > 30) {
@@ -82,15 +86,15 @@ export function renderPlainText(data: statementData, plays: Play): string {
         result += 300 * perf.audience;
         break;
       default:
-        throw new Error(`unknown type: ${perf.play?.type}`);
+        throw new Error(`unknown type: ${perf.play.type}`);
     }
     return result;
   }
 
-  function volumeCreditsFor(perf: Performance): number {
+  function volumeCreditsFor(perf: EnrichedPerformance): number {
     let result = 0;
     result += Math.max(perf.audience - 30, 0);
-    if ("comedy" === perf.play?.type) result += Math.floor(perf.audience / 5);
+    if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
     return result;
   }
 
