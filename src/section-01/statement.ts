@@ -1,34 +1,4 @@
-type Performance = {
-  playID: string;
-  audience: number;
-};
-
-export type Invoice = {
-  customer: string;
-  performances: Performance[];
-};
-
-type PlayInfo = {
-  name: string;
-  type: string;
-};
-
-export type Plays = {
-  [playID: string]: PlayInfo;
-};
-
-type EnrichedPerformance = Performance & {
-  playInfo: PlayInfo;
-  amount: number;
-  volumeCredits: number;
-};
-
-type StatementData = {
-  customer: string;
-  performances: EnrichedPerformance[];
-  totalAmount: number;
-  totalVolumeCredits: number;
-};
+import { createStatementData, type Invoice, type Plays, type StatementData } from "./createStatement.ts";
 
 function usd(current: number) {
   return new Intl.NumberFormat("en-US", {
@@ -39,77 +9,14 @@ function usd(current: number) {
 }
 
 export function statement(invoice: Invoice, plays: Plays): string {
-  const data = createStatementData(invoice, plays)
-  return renderPlainText(data);
+  return renderPlainText(createStatementData(invoice, plays));
 }
 
-export function createStatementData(invoice: Invoice, plays: Plays): StatementData {
-  const enrichedPerformances = invoice.performances.map(enrichPerformance);
-  const totalVolumeCredits = totalVolumeCreditsFor(enrichedPerformances);
-  const totalAmount = totalAmountFor(enrichedPerformances);
-
-  const statementData: StatementData = {
-    customer: invoice.customer,
-    performances: enrichedPerformances,
-    totalAmount,
-    totalVolumeCredits,
-  };
-  return statementData;
-
-  function enrichPerformance(perf: Performance): EnrichedPerformance {
-    const playInfo = playInfoFor(perf);
-    const amount = amountFor(perf, playInfo);
-    const volumeCredits = volumeCreditsFor(perf, playInfo);
-    return { ...perf, playInfo, amount, volumeCredits: volumeCredits };
-  }
-
-  function playInfoFor(perf: Performance): PlayInfo {
-    const result = plays[perf.playID];
-    if (result == null) {
-      throw new Error(`unknown playID: ${perf.playID}`);
-    }
-    return result;
-  }
-
-  function amountFor(perf: Performance, play: PlayInfo): number {
-    let result = 0;
-    switch (play.type) {
-      case "tragedy":
-        result = 40000;
-        if (perf.audience > 30) {
-          result += 1000 * (perf.audience - 30);
-        }
-        break;
-      case "comedy":
-        result = 30000;
-        if (perf.audience > 20) {
-          result += 10000 + 500 * (perf.audience - 20);
-        }
-        result += 300 * perf.audience;
-        break;
-      default:
-        throw new Error(`unknown type: ${play.type}`);
-    }
-    return result;
-  }
-
-  function volumeCreditsFor(perf: Performance, playInfo: PlayInfo): number {
-    let result = 0;
-    result += Math.max(perf.audience - 30, 0);
-    if ("comedy" === playInfo.type) result += Math.floor(perf.audience / 5);
-    return result;
-  }
-
-  function totalVolumeCreditsFor(enrichedPerformances: EnrichedPerformance[]): number {
-    return enrichedPerformances.reduce((acc, val) => acc + val.volumeCredits, 0);
-  }
-
-  function totalAmountFor(enrichedPerformances: EnrichedPerformance[]): number {
-    return enrichedPerformances.reduce((acc, val) => acc + val.amount, 0);
-  }
+export function htmlStatement(invoice: Invoice, plays: Plays): string {
+  return renderHtml(createStatementData(invoice, plays));
 }
 
-export function renderPlainText(data: StatementData): string {
+function renderPlainText(data: StatementData): string {
   let result = `Statement for ${data.customer}\n`;
 
   for (let enrichedPerf of data.performances) {
@@ -118,5 +25,19 @@ export function renderPlainText(data: StatementData): string {
 
   result += `Amount owed is ${usd(data.totalAmount / 100)}\n`;
   result += `You earned ${data.totalVolumeCredits} credits\n`;
+  return result;
+}
+
+function renderHtml(data: StatementData): string {
+  let result = `<h1>Statement for ${data.customer}</h1>\n`;
+  result += "<table>\n";
+  result += "<tr><th>play</th><th>seats</th><th>cost</th></tr>";
+  for (let perf of data.performances) {
+    result += `  <tr><td>${perf.playInfo.name}</td><td>${perf.audience}</td>`;
+    result += `<td>${usd(perf.amount)}</td></tr>\n`;
+  }
+  result += "</table>\n";
+  result += `<p>Amount owed is <em>${usd(data.totalAmount)}</em></p>\n`;
+  result += `<p> You earned <em>${data.totalVolumeCredits}</em> credits</p>\n`;
   return result;
 }

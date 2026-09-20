@@ -1,5 +1,5 @@
 import { statement } from "./statement.ts";
-import { type Invoice, type Plays } from "./statement.ts";
+import { type Invoice, type Plays } from "./createStatement.ts";
 
 import { readFileSync } from "node:fs";
 
