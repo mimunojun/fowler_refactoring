@@ -30,11 +30,7 @@ export function printOwing(invoice: Invoice) {
     outstanding += o.amount;
   }
 
-  // 締め日の記録 (record due date)
-  const today = Clock.today;
-
-  invoice.dueDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
-
+  recordDueDate(invoice);
   printDetails(invoice, outstanding);
 
   function printBanner() {
@@ -57,4 +53,14 @@ function printDetails(invoice: Invoice, outstanding: number) {
   console.log(`name: ${invoice.customer}`);
   console.log(`amount: ${outstanding}`);
   console.log(`due: ${invoice.dueDate.toLocaleDateString()}`);
+}
+
+/**
+ * 実は、何かに代入していたとしても、それが構造体(レコード, 配列, オブジェクト)であるなら、
+ * 引数でそれらを渡して抽出することが可能。
+ */
+function recordDueDate(invoice: Invoice) {
+  // 締め日の記録 (record due date)
+  const today = Clock.today;
+  invoice.dueDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
 }
