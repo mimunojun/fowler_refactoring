@@ -1,5 +1,5 @@
 import test from "node:test";
-import { Order, type Item } from "./replace-temp-with-query.ts";
+import { Order, type Item } from "../../src/07_encapsulation/replace-temp-with-query.ts";
 import assert from "node:assert";
 
 const fixedItem: Item = {

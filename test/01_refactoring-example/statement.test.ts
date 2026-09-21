@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { statement } from "./statement.ts";
-import { type Invoice, type Plays } from "./createStatement.ts";
+import { statement } from "../../src/01_refactoring-example/statement.ts";
+import { type Invoice, type Plays } from "../../src/01_refactoring-example/createStatement.ts";
 
 test("一番外側から実行して、正常にStatementが表示される", (t) => {
   const invoices = fixedInvoices();

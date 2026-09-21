@@ -1,5 +1,5 @@
 import test from "node:test";
-import { NumberRange, readingsOutsideRange, type Reading } from "./introduce-parameter-object.ts";
+import { NumberRange, readingsOutsideRange, type Reading } from "../../src/06_first-step/introduce-parameter-object.ts";
 import assert from "node:assert";
 
 const fixedStation = {
