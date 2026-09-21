@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert";
-import { printOwing } from "./using-local-variables.ts";
-import { type Invoice } from "./using-local-variables.ts";
+import { printOwing } from "../../src/06_first-step/using-local-variables.ts";
+import { type Invoice } from "../../src/06_first-step/using-local-variables.ts";
 
 
 test("printOwing()が正常に出力される", (t) => {
