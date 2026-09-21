@@ -8,13 +8,8 @@ type Station = {
   readings: Reading[];
 };
 
-export function readingsOutsideRange(
-  station: Station,
-  min: number,
-  max: number,
-  range: NumberRange,
-) {
-  return station.readings.filter((r) => r.temp < min || r.temp > max);
+export function readingsOutsideRange(station: Station, range: NumberRange) {
+  return station.readings.filter((r) => !range.Contains(r.temp));
 }
 
 export class NumberRange {
@@ -25,5 +20,9 @@ export class NumberRange {
   constructor(min: number, max: number) {
     this.min = min;
     this.max = max;
+  }
+
+  public Contains(arg: number): boolean {
+    return arg >= this.min && arg <= this.max;
   }
 }

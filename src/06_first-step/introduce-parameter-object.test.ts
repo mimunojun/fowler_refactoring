@@ -23,8 +23,6 @@ test('範囲外のもののみ表示され、範囲内のものは表示され�
 
   const actualList = readingsOutsideRange(
     fixedStation,
-    floor,
-    ceiling,
     range
   );
 
@@ -43,8 +41,6 @@ test('範囲内のものしかないので、何も表示されない', (t) => {
 
   const actualList = readingsOutsideRange(
     fixedStation,
-    floor,
-    ceiling,
     range
   );
 
@@ -60,8 +56,6 @@ test('範囲外のものしかないので、すべて表示される', (t) => {
 
   const actualList = readingsOutsideRange(
     fixedStation,
-    floor,
-    ceiling,
     range
   );
 
